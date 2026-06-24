@@ -54,8 +54,6 @@ Output
 ------
     data/filtered/tvl_fee_validation.csv          — full decomposition for all pools
     data/filtered/tvl_fee_validation_summary.csv   — top-N pools with identity check
-    latex/tables/TVLValidation.tex                 — LaTeX table for the paper
-
 Usage
 -----
     uv run python src/modeling/tvl_fee_validation.py
@@ -66,11 +64,13 @@ import argparse
 import asyncio
 import os
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 
 # ---------------------------------------------------------------------------
 # Optional subgraph query (reuses project infrastructure)
@@ -228,96 +228,6 @@ def format_pool_name(trading_pair):
             return f"{tokens} {fee_label}"
     return trading_pair
 
-
-def latex_int(n):
-    """Format integer with LaTeX-safe thousands separators: 19518 → '19{,}518'."""
-    s = f"{n:,d}"
-    return s.replace(",", "{,}")
-
-
-def generate_latex_table(df, top_n=10, output_path="latex/tables/TVLValidation.tex"):
-    """Generate the LaTeX table with fee decomposition for the paper."""
-    top = df.head(top_n)
-
-    total_pool_tvl = top["pool_tvl_usd"].sum()
-    total_pos_tvl = top["raw_positions_tvl_usd"].sum()
-    total_fees = top["uncollected_fees_usd"].sum()
-    total_lifetime = top["lifetime_fees_usd"].sum()
-
-    all_median_coverage = df["liquidity_coverage_pct"].median()
-
-    lines = [
-        r"\begin{table}[tb]",
-        r"\centering",
-        r"\captionsetup{font=small}",
-        (r"\caption{Position-derived \acs{tvl} validation and fee decomposition "
-         r"for the ten largest pools by \acs{tvl} on 28~February 2023 at 23:00~UTC. "
-         r"\emph{Reported \acs{tvl}} is the \texttt{totalValueLockedUSD} from "
-         r"Uniswap's subgraph (i.e., the pool contract's total token balance "
-         r"converted to \acs{usd}). \emph{Position \acs{tvl}} is the sum of "
-         r"per-position token amounts $X_{\mathit{real}}$ and $Y_{\mathit{real}}$ "
-         r"(\autoref{eq:UniswapV3LiquidityTicks}). The difference represents "
-         r"uncollected trading fees accumulated in the contract. \emph{Lifetime fees} "
-         r"are the cumulative fee revenue (volume $\times$ fee rate) since pool "
-         r"deployment, confirming that sufficient fees were generated to account "
-         r"for the observed gap.}"),
-        r"\label{tab:tvl-validation}",
-        r"\small",
-        r"\begin{tabular}{@{}l r r r r r@{}}",
-        r"\toprule",
-        r"Pool & LPs & Reported TVL & Position TVL & Uncollected & Lifetime \\",
-        r" & & (\$M) & (\$M) & fees (\$M) & fees (\$M) \\",
-        r"\midrule",
-    ]
-
-    for _, r in top.iterrows():
-        name = format_pool_name(r["trading_pair"])
-        name_tex = name.replace("%", r"\%")
-        lines.append(
-            f"{name_tex} & "
-            f"{latex_int(r['num_lps'])} & "
-            f"{r['pool_tvl_usd']/1e6:.1f} & "
-            f"{r['raw_positions_tvl_usd']/1e6:.1f} & "
-            f"{r['uncollected_fees_usd']/1e6:.1f} & "
-            f"{r['lifetime_fees_usd']/1e6:.1f} \\\\"
-        )
-
-    def latex_millions(v):
-        """Format millions with {,} separators: 1339.2 → '1{,}339.2'."""
-        s = f"{v/1e6:,.1f}"
-        return s.replace(",", "{,}")
-
-    lines += [
-        r"\addlinespace",
-        r"\midrule",
-        (f"Top 10 total & & "
-         f"{latex_millions(total_pool_tvl)} & "
-         f"{latex_millions(total_pos_tvl)} & "
-         f"{latex_millions(total_fees)} & "
-         f"{latex_millions(total_lifetime)} \\\\"),
-        r"\bottomrule",
-        r"\end{tabular}",
-        r"\begin{tablenotes}",
-        r"\scriptsize",
-        (r"\item Volatile-pair pools (e.g., USDC/WETH, WETH/USDT) accumulate "
-         r"substantial uncollected fees from high trading volume, producing "
-         r"position coverage of 42--65\%. Stablecoin-pair pools "
-         r"(e.g., USDC/USDT, FRAX/USDC) show near-complete coverage "
-         r"($>$96\%) due to minimal price movement and correspondingly low "
-         r"fee accrual. Median coverage across all "
-         f"{len(df)} pools is {all_median_coverage:.0f}\\%. "
-         r"Lifetime fees confirm that cumulative trading revenue is sufficient "
-         r"to account for the observed gap in every pool."),
-        r"\end{tablenotes}",
-        r"\end{table}",
-        "",
-    ]
-
-    with open(output_path, "w") as f:
-        f.write("\n".join(lines))
-    print(f"Wrote {output_path}")
-
-
 def save_summary_csv(df, top_n, data_dir):
     """Save a focused summary CSV with the accounting identity validation.
 
@@ -415,9 +325,6 @@ async def main():
 
     # 2. Summary CSV (top-N with identity check and totals row)
     save_summary_csv(df, args.top_n, args.data_dir)
-
-    # 3. LaTeX table
-    generate_latex_table(df, top_n=args.top_n)
 
     # --- Print validation report ---
     top = df.head(args.top_n)

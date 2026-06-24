@@ -1,10 +1,10 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import pandas as pd
 from decimal import Decimal, getcontext, ROUND_DOWN, ROUND_HALF_UP, ROUND_UP, InvalidOperation, DivisionUndefined
-
-# Adding the path to be able to import the analytics module
-import sys
-
-sys.path.append('./../../../')
 
 from src.modeling.analytics_levels import (get_token_amounts, get_tick_at_sqrt_price,
                                            tick_to_price_simple, get_vwap, get_vwapm, get_mci,
