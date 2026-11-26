@@ -221,3 +221,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# This package: data files stay out, except the small sample
+*.parquet
+!data/sample/*.parquet
+.idea/
+.DS_Store
