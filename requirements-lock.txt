@@ -1,0 +1,10 @@
+# The tested environment (Python 3.14). Install: pip install -r requirements-lock.txt
+eth-abi==5.2.0
+eth-hash==0.8.0
+eth-utils==5.3.1
+fastparquet==2025.12.0
+linearmodels==7.0
+numpy==2.4.2
+pandas==3.0.1
+pycryptodome==3.24.0
+requests==2.32.5

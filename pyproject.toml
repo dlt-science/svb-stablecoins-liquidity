@@ -1,0 +1,29 @@
+[project]
+name = "svb-stablecoins-liquidity"
+version = "0.1.0"
+description = "Adapted MCI, LP-principal TVL and DiD of 'Impact of Adverse Disclosures on Liquidity of Stablecoin Markets'"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "requests>=2.31",
+    "eth-abi>=5",
+    "eth-utils>=4",
+    "eth-hash[pycryptodome]>=0.5",
+    "fastparquet>=2024.2",
+    "linearmodels>=6",
+]
+
+[project.optional-dependencies]
+data = ["huggingface_hub>=0.20"]      # for the Data section of the README
+
+[dependency-groups]
+dev = ["ruff>=0.8"]                   # uv run ruff check, uv format
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, import order, bugbear, modern syntax, simplifications, comprehensions
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4"]

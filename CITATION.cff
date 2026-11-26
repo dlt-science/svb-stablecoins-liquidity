@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this code or its data, please cite the paper."
+title: "Code for the paper: Impact of Adverse Disclosures on Liquidity of Stablecoin Markets"
+authors:
+  - family-names: "Hernandez Cruz"
+    given-names: "Walter"
+  - family-names: "Xu"
+    given-names: "Jiahua"
+  - family-names: "Tasca"
+    given-names: "Paolo"
+  - family-names: "Campajola"
+    given-names: "Carlo"
+preferred-citation:
+  type: article
+  title: "Impact of Adverse Disclosures on Liquidity of Stablecoin Markets"
+  authors:
+    - family-names: "Hernandez Cruz"
+      given-names: "Walter"
+    - family-names: "Xu"
+      given-names: "Jiahua"
+    - family-names: "Tasca"
+      given-names: "Paolo"
+    - family-names: "Campajola"
+      given-names: "Carlo"
+  year: 2024
+  identifiers:
+    - type: other
+      value: "arXiv:2407.11716"
+  url: "https://arxiv.org/abs/2407.11716"
